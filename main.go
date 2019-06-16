@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"github.com/PuerkitoBio/goquery"
-	"github.com/fpfeng/httpcache/diskcache"
 	"github.com/geziyor/geziyor"
 	"github.com/geziyor/geziyor/exporter"
 	"io/ioutil"
@@ -41,7 +40,6 @@ func fetchServants() {
 		Exporters: []geziyor.Exporter{exporter.JSONExporter{
 			FileName: File,
 		}},
-		Cache: diskcache.New(".cache"),
 		ParseFunc: func(r *geziyor.Response) {
 			r.DocHTML.Find("#CardSelectTr > tbody").Children().Each(func(i int, s *goquery.Selection) {
 				if i == 0 {
