@@ -9,7 +9,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"sync"
 )
 
 var File = "./fatego_servants.json"
@@ -92,17 +91,11 @@ func readServants() {
 func downloadImages() {
 	_ = os.RemoveAll("images")
 	log.Println("Downloading Started")
-	var wg sync.WaitGroup
 	for _, servant := range AllServants {
 		for name, url := range servant.Image {
-			wg.Add(1)
-			go func(servant Servant, name, url string) {
-				DownloadImage(servant.Name, name, url)
-				wg.Done()
-				log.Println("Downloaded", name)
-			}(servant, name, url)
+			DownloadImage(servant.Name, name, url)
+			log.Println("Downloaded", name)
 		}
 	}
-	wg.Wait()
 	log.Println("Finished")
 }
