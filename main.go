@@ -43,7 +43,7 @@ func fetchServants() {
 		}},
 		ParseFunc: func(r *geziyor.Response) {
 			r.DocHTML.Find("#CardSelectTr > tbody").Children().Each(func(i int, s *goquery.Selection) {
-				if i == 0 || i > 4 {
+				if i == 0 {
 					return
 				}
 				//基本信息
