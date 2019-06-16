@@ -1,0 +1,7 @@
+.idea/
+.vscode/
+go.sum
+vender/
+fatego
+fatego_servants.json
+images/
