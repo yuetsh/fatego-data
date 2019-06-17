@@ -12,8 +12,10 @@ import (
 	"github.com/geziyor/geziyor/exporter"
 )
 
+// File 文件名
 var File = "fatego_servants.json"
 
+// Servant 从者信息
 type Servant struct {
 	ID    string            `json:"id"`
 	Name  string            `json:"name"`
