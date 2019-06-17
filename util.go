@@ -19,14 +19,11 @@ func DownloadImage(folder, filename, url string) {
 	if err != nil {
 		panic(err)
 	}
-	defer img.Close()
 	resp, err := http.Get(url)
 	if err != nil {
 		panic(err)
 	}
 	defer resp.Body.Close()
-	_, err = io.Copy(img, resp.Body)
-	if err != nil {
-		panic(err)
-	}
+	_, _ = io.Copy(img, resp.Body)
+	_ = img.Close()
 }

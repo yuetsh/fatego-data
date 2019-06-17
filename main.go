@@ -3,9 +3,9 @@ package main
 import (
 	"bufio"
 	"encoding/json"
-	"log"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/geziyor/geziyor"
@@ -31,14 +31,19 @@ func main() {
 	}
 	scanner := bufio.NewScanner(file)
 	scanner.Split(bufio.ScanLines)
+	var wg sync.WaitGroup
 	for scanner.Scan() {
 		var servant Servant
 		err = json.Unmarshal(scanner.Bytes(), &servant)
-		for name, url := range servant.Image {
-			DownloadImage(servant.ID+"_"+servant.Name, name, url)
-			log.Println("Downloaded", name)
-		}
+		wg.Add(1)
+		go func(servant *Servant) {
+			for name, url := range servant.Image {
+				DownloadImage(servant.ID+"_"+servant.Name, name, url)
+			}
+			wg.Done()
+		}(&servant)
 	}
+	wg.Wait()
 }
 
 func fetchServants() {
