@@ -1,8 +1,8 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
-	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -12,8 +12,7 @@ import (
 	"github.com/geziyor/geziyor/exporter"
 )
 
-var File = "./fatego_servants.json"
-var AllServants []Servant
+var File = "fatego_servants.json"
 
 type Servant struct {
 	ID    string            `json:"id"`
@@ -25,16 +24,24 @@ type Servant struct {
 }
 
 func main() {
-	if _, err := os.Stat(File); os.IsNotExist(err) {
+	file, err := os.Open(File)
+	defer file.Close()
+	if os.IsNotExist(err) {
 		fetchServants()
-	} else {
-		readServants()
 	}
-	downloadImages()
+	scanner := bufio.NewScanner(file)
+	scanner.Split(bufio.ScanLines)
+	for scanner.Scan() {
+		var servant Servant
+		err = json.Unmarshal(scanner.Bytes(), &servant)
+		for name, url := range servant.Image {
+			DownloadImage(servant.ID+"_"+servant.Name, name, url)
+			log.Println("Downloaded", name)
+		}
+	}
 }
 
 func fetchServants() {
-	_ = os.Remove(File)
 	geziyor.NewGeziyor(geziyor.Options{
 		StartURLs: []string{"http://wiki.joyme.com/fgo/%E8%8B%B1%E7%81%B5%E5%88%97%E8%A1%A8"},
 		UserAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36",
@@ -67,36 +74,12 @@ func fetchServants() {
 					table.Find("img").Each(func(i int, s *goquery.Selection) {
 						url, _ := s.Attr("src")
 						name, _ := s.Attr("data-file-name")
-						parsedName := strings.Replace(name, ".png", "", -1)
+						parsedName := strings.ReplaceAll(name, ".png", "")
 						servant.Image[parsedName] = strings.ReplaceAll(url, "/dr/300__", "")
 					})
 				})
-				AllServants = append(AllServants, servant)
+				r.Exports <- servant
 			})
-			r.Exports <- AllServants
 		},
 	}).Start()
-}
-
-func readServants() {
-	bytes, err := ioutil.ReadFile(File)
-	if err != nil {
-		panic(err)
-	}
-	err = json.Unmarshal(bytes, &AllServants)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func downloadImages() {
-	_ = os.RemoveAll("images")
-	log.Println("Downloading Started")
-	for _, servant := range AllServants {
-		for name, url := range servant.Image {
-			DownloadImage(servant.Name, name, url)
-			log.Println("Downloaded", name)
-		}
-	}
-	log.Println("Finished")
 }
