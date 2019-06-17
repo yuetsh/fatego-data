@@ -2,13 +2,14 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/PuerkitoBio/goquery"
-	"github.com/geziyor/geziyor"
-	"github.com/geziyor/geziyor/exporter"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/geziyor/geziyor"
+	"github.com/geziyor/geziyor/exporter"
 )
 
 var File = "./fatego_servants.json"
@@ -45,7 +46,7 @@ func fetchServants() {
 				if i == 0 {
 					return
 				}
-				//基本信息
+				// 基本信息
 				id := s.Find("td:nth-child(1)")
 				link := s.Find("td:nth-child(3) > a")
 				star := s.Find("td:nth-child(4)")
@@ -60,7 +61,7 @@ func fetchServants() {
 					Class: strings.TrimSpace(class.Text()),
 					Image: make(map[string]string),
 				}
-				//详细信息
+				// 详细信息
 				r.Geziyor.Get(servant.Link, func(r *geziyor.Response) {
 					table := r.DocHTML.Find("#mw-content-text > div:nth-child(4) > div.col-md-4 > table")
 					table.Find("img").Each(func(i int, s *goquery.Selection) {
